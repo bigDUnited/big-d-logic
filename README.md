@@ -16,3 +16,11 @@ This will load the Prolog file with facts and rules and then in the Prolog progr
 ?- grandfather(a,c).
 ```
 This should return as true. If it does the program works. Try changing the arguments to see that no other condition will return true.
+
+
+### Building
+
+To build project run:
+```sh
+make
+```
