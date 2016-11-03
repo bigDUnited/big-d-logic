@@ -1,6 +1,7 @@
 // Example program
 #include <iostream>
 #include <string>
+#include <stdio.h>
 
 #define print(x) std::cout << x << "!\n";
 
@@ -18,5 +19,5 @@ int main()
 {
   print("hey madafaka");
   
-  fact("father %s %s", "A", "B");
+  fact("father %s %s \n", "A", "B");
 }
