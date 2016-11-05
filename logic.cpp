@@ -3,21 +3,28 @@
 #include <string>
 #include <stdio.h>
 
+class Symbol {
+    Symbol operator !();
+};
+
+void fact(char * expr) {}
+void query(char * expr) {}
+void rule(char * expr) {}
+
 #define print(x) std::cout << x << "!\n";
 
+#define SHOW(a) std::cout << #a << std::endl;
 
-#define fact(name,args...) {\
-    printf(name, args);\
-    char * arr[] = {args};\
-    printf(arr[0]);\
-    }\
+#define F(e...) fact(#e);
+#define Q(e...) query(#e);
+#define R(e...) rule(#e);
 
-
-//#define rule(x,y)
 
 int main()
 {
-  print("hey madafaka");
-  
-  fact("father %s %s \n", "A", "B");
+    F(father, a, b)
+    F(father, b, c)
+    R(grandfather(X,Y) :- father(X,Z) and father(Z,Y))
+    Q(father, a, b)
+    return 0;
 }
