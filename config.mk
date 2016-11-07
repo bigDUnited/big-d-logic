@@ -6,7 +6,7 @@ MANPREFIX = ${PREFIX}/share/man
 
 INCS =
 LIBS =
-CFLAGS = -pedantic -Wall -Os ${INCS}
+CFLAGS = -pedantic -std=c++11 -Wall -Os ${INCS}
 LDFLAGS = -s ${LIBS}
 OBJ_NAME = logic
 
