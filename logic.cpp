@@ -4,12 +4,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <vector>
+#include <sstream>
 using namespace std;
 
 class Symbol
 {
     Symbol operator !();
 };
+
+class NoNodeException{};
 
 class Node 
 {
@@ -35,6 +38,16 @@ public:
     char * get_functor() const {
 	return _functor;
     }
+
+    Node* find_node(char* value) {
+	for(auto & child: _children) {
+	    if (strcmp(child.get_value(), value) == 0) {
+		return &child;
+	    }
+	    child.find_node(value);
+	}
+	return NULL;
+    }
 };
 
 class Tree {
@@ -42,6 +55,10 @@ private:
     Node & _root;
 public:
     Tree(Node & root):_root(root) {}
+
+    vector<Node>& get_functors() {
+       return _root.get_children();
+    }
 
     Node & get_functor(char * functor) {
 	for(auto & child: _root.get_children()) {
@@ -52,12 +69,32 @@ public:
 	vector<Node> children = vector<Node>();
 	Node n = Node("", functor, children);
 	_root.get_children().push_back(n);
+	return _root.get_children().back();
+    }
+
+    Node* find_node(Node& functor_node, char* value) {
+	Node* n = functor_node.find_node(value);
+	if (n == NULL) {
+	    vector<Node> children = vector<Node>();
+	    *n = Node(value, "", children);
+	    functor_node.get_children().push_back(*n);
+	}
 	return n;
     }
 
     void add_fact(char * functor, Node & node) {
 	Node & functor_node = get_functor(functor);
-	
+	// find if in tree
+	Node * target = find_node(functor_node, node.get_value());
+	if (strcmp(target->get_value(), "") == 0) {
+	    functor_node.get_children().push_back(node);
+	} else {
+	    char * val = node.get_children()[0].get_value();
+	    Node* existing_child = target->find_node(val);
+	    if (strcmp(existing_child->get_value(), "") == 0) {
+		target->get_children().push_back(node.get_children()[0]);
+	    }
+	}
     }
 };
 
@@ -71,15 +108,46 @@ public:
 
     void parse_fact(char * expr) 
     {
-	// // functor, a, b
-	// unsigned int expr_len = strlen(expr);
-	// char functor[255];
-	// char arg[255];
-	// vector<Node>& children;
-	// Node node;
-	// for (int i = 0; i < expr_len; i++) {
-	    
-	// }
+	//functor, a, b
+	unsigned int expr_len = strlen(expr);
+	unsigned char stage = 0;
+	unsigned char v = 0;
+	char functor[255];
+	char arg0[255];
+	char arg1[255];
+	vector<Node> children;
+	Node* func_node;
+	Node* node;
+	for (int i = 0; i < expr_len; i++) {
+	    if (expr[i] == ',') {
+		if (stage == 0) {
+		    functor[v] = '\0';
+		    //func_node = &_t.get_functor(functor);
+		} else if (stage == 1) {
+		    arg0[v] = '\0';
+		    // node = _t.find_node(*func_node, arg0);
+		} else if (stage == 2) {
+		    arg1[v] = '\0';
+		    // vector<Node> children = vector<Node>();
+		    // Node child_node = Node(arg1, "", children);
+		    // node->get_children().push_back(child_node);
+		    break;
+		}
+		stage++;
+		v = 0;
+		continue;
+	    }
+
+	    if (stage == 0){
+		functor[v] = expr[i];
+	    } else if (stage == 1){
+                arg0[v] = expr[i];
+	    } else if (stage == 2){
+		arg1[v] = expr[i];
+	    }
+	    v++;
+	}
+	printf("%s %s %s\n", functor, arg0, arg1);
     }
     
 };
@@ -87,8 +155,10 @@ public:
 
 void fact(char * expr, Tree* t) 
 {
-    // Fact f = parse_fact(expr);
+    Parser p = Parser(*t);
+    p.parse_fact(expr);
 }
+
 void query(char * expr, Tree* t) {}
 void rule(char * expr, Tree* t) {}
 
@@ -105,7 +175,10 @@ int main()
     vector<Node> hello = vector<Node>();
     Node root = Node("", "", hello);
     Tree t = Tree(root);
-    F(father, a, b)
+    t.get_functor("faggot");
+    
+    
+    //F(father, a, b)
     // F(father, b, c)
     // R(grandfather(X,Y) :- father(X,Z) and father(Z,Y))
     // Q(father, a, b)
