@@ -4,11 +4,11 @@ VERSION = 0.1
 PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 
-INCS =
-LIBS =
-CFLAGS = -pedantic -std=c++11 -Wall -Os ${INCS}
+INCS = -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+LIBS = -lglib-2.0
+CFLAGS = -pedantic -Wall -Os ${INCS}
 LDFLAGS = -s ${LIBS}
 OBJ_NAME = logic
 
 
-CC = g++
+CC = gcc
