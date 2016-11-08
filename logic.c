@@ -1,12 +1,9 @@
-// Example program
 #include <stdio.h>
 #include <string.h>
-#include <glib.h>
 
 struct Node {
-  char * _value;
-  char * _functor;
-  struct Glist * _children;
+    char * value;
+    char * functor;
 };
 
 struct Node * find_node(struct Node * node, char * value)
@@ -16,7 +13,11 @@ struct Node * find_node(struct Node * node, char * value)
 
 struct Node * get_functor(struct Node * node, char * functor) 
 {
-
+    if (node->children == NULL) {
+	struct Node functor_node = {"", functor};
+    } else {
+	
+    }
 }
 
 struct Node * find_node_tree(struct Node * functor_node, char * value)
@@ -181,8 +182,7 @@ void parse_fact(char * expr)
 
 void fact(char * expr)
 {
-	// Parser p = Parser(*t);
-	// p.parse_fact(expr);
+    // p.parse_fact(expr);
 }
 
 void query(char * expr) {}
@@ -195,20 +195,13 @@ void rule(char * expr) {}
 
 int main()
 {
-	// vector<Node> hello = vector<Node>();
-	// Node root = Node("", "", hello);
-	// Node* node;
-	// Node* functor;
-	// Tree t = Tree(root);
-	// char * ff = "father";
-	// t.get_functor("faggot");
-	// node = t.find_node(
-	F(father, a, b);
-	// t.get_functor(ff);
-	// printf("%d get children \n", t.get_functor((char*)"father").get_children().size());
-	// printf("%d \n", t.get_functors().size());
-	// F(father, b, c)
-	// R(grandfather(X,Y) :- father(X,Z) and father(Z,Y))
-	// Q(father, a, b)
-	return 0;
+    // vector<Node> hello = vector<Node>();
+    struct Node root = {"", ""};
+    get_functor(&root, "father");
+    F(father, a, b);
+    // F(father, b, c)
+    // R(grandfather(X,Y) :- father(X,Z) and father(Z,Y))
+    // Q(father, a, b)
+    g_list_free(rootp->children);
+    return 0;
 }

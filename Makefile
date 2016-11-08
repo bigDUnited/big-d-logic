@@ -1,7 +1,7 @@
 include config.mk
 
 SRC = logic.c
-OBJ = ${SRC:.cpp=.o}
+OBJ = ${SRC:.c=.o}
 BIN = ${OBJ:.o=}
 
 all: options ${BIN}

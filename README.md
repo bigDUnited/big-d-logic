@@ -24,3 +24,15 @@ To build project run:
 ```sh
 make
 ```
+
+
+### Running evil bash version
+Install tree:
+```sh
+sudo apt-get install tree
+```
+
+run:
+```sh
+./logic.sh
+```
