@@ -44,7 +44,7 @@ public:
 	    if (strcmp(child.get_value(), value) == 0) {
 		return &child;
 	    }
-	    child.find_node(value);
+            child.find_node(value);
 	}
 	return NULL;
     }
@@ -76,10 +76,12 @@ public:
 	Node* n = functor_node.find_node(value);
 	if (n == NULL) {
 	    vector<Node> children = vector<Node>();
-	    *n = Node(value, "", children);
-	    functor_node.get_children().push_back(*n);
+	    Node new_node = Node(value, "", children);
+	    functor_node.get_children().push_back(new_node);
+	    return &functor_node.get_children().back();
+	} else {
+	    return n;
 	}
-	return n;
     }
 
     void add_fact(char * functor, Node & node) {
@@ -115,29 +117,22 @@ public:
 	char functor[255];
 	char arg0[255];
 	char arg1[255];
-	vector<Node> children;
+	vector<Node> children = vector<Node>();
 	Node* func_node;
 	Node* node;
 	for (int i = 0; i < expr_len; i++) {
 	    if (expr[i] == ',') {
 		if (stage == 0) {
 		    functor[v] = '\0';
-		    //func_node = &_t.get_functor(functor);
+		    func_node = &_t.get_functor(functor);
 		} else if (stage == 1) {
 		    arg0[v] = '\0';
-		    // node = _t.find_node(*func_node, arg0);
-		} else if (stage == 2) {
-		    arg1[v] = '\0';
-		    // vector<Node> children = vector<Node>();
-		    // Node child_node = Node(arg1, "", children);
-		    // node->get_children().push_back(child_node);
-		    break;
+		    node = _t.find_node(*func_node, arg0);
 		}
 		stage++;
 		v = 0;
 		continue;
 	    }
-
 	    if (stage == 0){
 		functor[v] = expr[i];
 	    } else if (stage == 1){
@@ -147,7 +142,9 @@ public:
 	    }
 	    v++;
 	}
-	printf("%s %s %s\n", functor, arg0, arg1);
+	arg1[v] = '\0';
+	Node child_node = Node(arg1, "", children);
+	node->get_children().push_back(child_node);
     }
     
 };
@@ -174,11 +171,12 @@ int main()
 {
     vector<Node> hello = vector<Node>();
     Node root = Node("", "", hello);
+    Node* node;
+    Node* functor;
     Tree t = Tree(root);
-    t.get_functor("faggot");
-    
-    
-    //F(father, a, b)
+    // t.get_functor("faggot");
+    // node = t.find_node(
+    F(father,a,b);
     // F(father, b, c)
     // R(grandfather(X,Y) :- father(X,Z) and father(Z,Y))
     // Q(father, a, b)
