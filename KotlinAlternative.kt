@@ -46,58 +46,108 @@ fun builder( a : Node ) {
     var h = Node(c, "8", ArrayList<Node>() );
     c.addChild( h );
 
-//        var l = Node(g, "12", ArrayList<Node>() );
-//        g.addChild(l);
-//        var m = Node(g, "13", ArrayList<Node>() );
-//        g.addChild(m);
+        var l = Node(g, "12", ArrayList<Node>() );
+        g.addChild(l);
+        var m = Node(g, "13", ArrayList<Node>() );
+        g.addChild(m);
 
 
+}
+
+fun grandfather( a : Node, aName: String, bName: String ): Boolean {
+    var god : Node = a;
+    var parent : Node = Node(null, "", null);
+    var grandchild : Node = Node(null, "", null);
+
+    println("Hi! Req.Parent: " + aName + " & req.Child: " + bName);
+
+    if( god.getName() == aName ) {
+        parent = god;
+        println("You are first element (god!) - EASY!");
+    } else {
+        println("Go deep, current parent : " + a.getName());
+
+        for (godElem in god.getChildren()) {
+            println("Hi! Plausable Parent: " + godElem.getName() + " & req.Child: " + bName );
+
+            var result = father(godElem, aName, bName);
+            if (result == true ) return result;
+        }
+    }
+    println("Checking : " + parent.getName() + " atm ...");
+
+    if ( parent.getName() != "" ) {
+        for (parentElem in parent.getChildren()) {
+            println("> Child : " + parentElem.getName());
+            for (grandchildElem in parentElem.getChildren()) {
+                if (grandchildElem.getName() == bName) {
+                    grandchild = grandchildElem;
+
+                    println("I AM the CORRECT >>> Grandchild!!! : " + grandchildElem.getName());
+                    break;
+                } else {
+
+                    println("I am NOT the correct >>> Grandchild : " + grandchildElem.getName());
+                }
+
+            }
+        }
+    }
+
+    if ( (grandchild.getName() != "") && (parent.getName() != "") ) {
+
+        println("SUCCESS : parentName: " + parent.getName() + " & " + grandchild.getName() );
+        return true;
+    }
+
+    println("Did not find proper child, sorry!");
+    return false;
 }
 
 fun father( a : Node, aName: String, bName: String ): Boolean {
     var god : Node = a;
     var parent : Node = Node(null, "", null);
     var child : Node = Node(null, "", null);
-    
+
     println("Hi! Req.Parent: " + aName + " & req.Child: " + bName);
-    
+
     if( god.getName() == aName ) {
         parent = god;
-       
+
         println("You are first element (god!) - EASY!");
-    
+
     } else {
         println("Go deep, current parent : " + a.getName());
-        
+
         for (godElem in god.getChildren()) {
             println("Hi! Plausable Parent: " + godElem.getName() + " & req.Child: " + bName );
-            
+
             var result = father(godElem, aName, bName);
             if (result == true ) return result;
         }
     }
     println("Checking : " + parent.getName() + " atm ...");
-    
+
     if ( parent.getName() != "" ) {
         for (parentElem in parent.getChildren()) {
             if (parentElem.getName() == bName) {
                 child = parentElem;
-                
+
                 println("I AM the CORRECT child!!! : " + parentElem.getName());
                 break;
             } else {
-                
+
                 println("I am NOT the correct child : " + parentElem.getName());
             }
         }
     }
 
     if ( (child.getName() != "") && (parent.getName() != "") ) {
-        
+
         println("SUCCESS : parentName: " + parent.getName() + " & " + child.getName() );
         return true;
     }
-    
+
     println("Did not find proper child, sorry!");
     return false;
 
@@ -109,7 +159,8 @@ fun main(args: Array<String>) {
 
     //for (parentElem in a.getChildren()) {println(parentElem.getName())}
     //println( "Result is " + father(a, "1", "2") );
-    println( "Result is " + father(a, "5", "9") );
+    //println( "Result is " + father(a, "7", "13") );
+    println( "Result is " +  grandfather(a, "5", "11") );
 
 }
 
