@@ -55,56 +55,10 @@ fun builder( a : Node ) {
 }
 
 fun grandfather( a : Node, aName: String, bName: String ): Boolean {
-    var god : Node = a;
-    var parent : Node = Node(null, "", null);
-    var grandchild : Node = Node(null, "", null);
-
-    println("Hi! Req.Parent: " + aName + " & req.Child: " + bName);
-
-    if( god.getName() == aName ) {
-        parent = god;
-        println("You are first element (god!) - EASY!");
-    } else {
-        println("Go deep, current parent : " + a.getName());
-
-        for (godElem in god.getChildren()) {
-            println("Hi! Plausable Parent: " + godElem.getName() + " & req.Child: " + bName );
-
-            var result = father(godElem, aName, bName);
-            if (result == true ) return result;
-        }
-    }
-    println("Checking : " + parent.getName() + " atm ...");
-
-    if ( parent.getName() != "" ) {
-        for (parentElem in parent.getChildren()) {
-            println("> Child : " + parentElem.getName());
-            for (grandchildElem in parentElem.getChildren()) {
-                if (grandchildElem.getName() == bName) {
-                    grandchild = grandchildElem;
-
-                    println("I AM the CORRECT >>> Grandchild!!! : " + grandchildElem.getName());
-                    break;
-                } else {
-
-                    println("I am NOT the correct >>> Grandchild : " + grandchildElem.getName());
-                }
-
-            }
-        }
-    }
-
-    if ( (grandchild.getName() != "") && (parent.getName() != "") ) {
-
-        println("SUCCESS : parentName: " + parent.getName() + " & " + grandchild.getName() );
-        return true;
-    }
-
-    println("Did not find proper child, sorry!");
-    return false;
+    return father(a, aName, bName, "grandfather");
 }
 
-fun father( a : Node, aName: String, bName: String ): Boolean {
+fun father( a : Node, aName: String, bName: String, state : String ): Boolean {
     var god : Node = a;
     var parent : Node = Node(null, "", null);
     var child : Node = Node(null, "", null);
@@ -122,7 +76,7 @@ fun father( a : Node, aName: String, bName: String ): Boolean {
         for (godElem in god.getChildren()) {
             println("Hi! Plausable Parent: " + godElem.getName() + " & req.Child: " + bName );
 
-            var result = father(godElem, aName, bName);
+            var result = father(godElem, aName, bName, state);
             if (result == true ) return result;
         }
     }
@@ -130,14 +84,29 @@ fun father( a : Node, aName: String, bName: String ): Boolean {
 
     if ( parent.getName() != "" ) {
         for (parentElem in parent.getChildren()) {
-            if (parentElem.getName() == bName) {
-                child = parentElem;
+            if( "grandfather" == state ){
+                for (grandchildElem in parentElem.getChildren()) {
+                    if (grandchildElem.getName() == bName) {
+                        child = grandchildElem;
 
-                println("I AM the CORRECT child!!! : " + parentElem.getName());
-                break;
+                        println("I AM the CORRECT >>> Grandchild!!! : " + grandchildElem.getName());
+                        break;
+                    } else {
+
+                        println("I am NOT the correct >>> Grandchild : " + grandchildElem.getName());
+                    }
+
+                }
             } else {
+                if (parentElem.getName() == bName) {
+                    child = parentElem;
 
-                println("I am NOT the correct child : " + parentElem.getName());
+                    println("I AM the CORRECT child!!! : " + parentElem.getName());
+                    break;
+                } else {
+
+                    println("I am NOT the correct child : " + parentElem.getName());
+                }
             }
         }
     }
@@ -157,10 +126,8 @@ fun main(args: Array<String>) {
     val a = Node(null, "1", ArrayList<Node>() );
     builder( a );
 
-    //for (parentElem in a.getChildren()) {println(parentElem.getName())}
-    //println( "Result is " + father(a, "1", "2") );
-    //println( "Result is " + father(a, "7", "13") );
-    println( "Result is " +  grandfather(a, "5", "11") );
+    //println( "Result is " + father(a, "5", "11", "father") );
+    println( "Result is " +  grandfather(a, "2", "11") );
 
 }
 
