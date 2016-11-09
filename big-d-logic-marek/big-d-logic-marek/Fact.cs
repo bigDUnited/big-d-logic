@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace big_d_logic_marek
 {
@@ -9,10 +7,16 @@ namespace big_d_logic_marek
         public string Functor { get; private set; }
         public List<string> ChildrenList { get; private set; }
 
-        public Fact(string functor, params string[] children)
+        public Fact(params string[] args)
         {
-            this.Functor = functor;
-            ChildrenList = children.ToList();
+            //first argument is the functor
+            Functor = args[0];
+            ChildrenList = new List<string>();
+            for (var i = 1; i < args.Length; i++)
+            {
+                //iterate the array of arguments after the 1st one to make the children
+                ChildrenList.Add(args[i]);
+            }
         }
     }
 }
