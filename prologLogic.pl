@@ -1,6 +1,6 @@
 father(a,b).
-father(a,a).
 father(b,a).
+father(b,c).
 %% father(b,c).
 %% father(z,a).
 %% father(a,b).
