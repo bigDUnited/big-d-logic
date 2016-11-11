@@ -80,15 +80,17 @@ context=()
 #return a chain of operations to be evaluated
 function parse_q() {
     context=()
+    ast=()
+    iast=0
     wfunctor=1 #awaiting functor
     wargs=0 #awaiting arguments
     for var in "$@"
     do
 	get_case $var
 	if [ "$return" = "lower" ] && [ $wfunctor = 1 ]; then
+	    ast+=("$var");
 	    wfunctor=0
 	    wargs=1
-	    iast+=1
 	elif [ "$return" = "upper" ] && [ $wfunctor = 0 ] &&
 	    [ $wargs = 1 ]; then
 	    case "${context[@]}" in
@@ -97,14 +99,21 @@ function parse_q() {
 		    context+=("$var")
 		    ;;
 	    esac
+	    ast[$iast]+=" $var";
 	elif [ "$return" = "lower" ] && [ $wfunctor = 0 ] &&
 	    [ $wargs = 1 ]; then
-	    printf ""
+	    ast[$iast]+=" $var";
 	elif [ "${var:0:1}" = ":" ] && [ $wfunctor = 0 ] &&
 	    [ $wargs = 1 ]; then
+	    ast+=("$var")
 	    wfunctor=1
 	    wargs=0
+	    iast=`expr $iast + 2`
 	fi
+    done
+    for var in "${ast[@]}"
+    do
+	echo $var
     done
 }
 
