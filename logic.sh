@@ -68,27 +68,21 @@ function const_q {
     fi
 }
 
-#get full result set for a path
-function set_q {
-    functor=$1
-    path=$2
-    return=$()
-}
-
 #context where variables are stored
 context=()
+ast=()
 #return a chain of operations to be evaluated
 function parse_q() {
     context=()
-    ast=()
-    iast=0
+    ast=() #abstract syntax tree
+    iast=0 #index of abstract sytax tree
     wfunctor=1 #awaiting functor
     wargs=0 #awaiting arguments
     for var in "$@"
     do
 	get_case $var
 	if [ "$return" = "lower" ] && [ $wfunctor = 1 ]; then
-	    ast+=("$var");
+	    ast+=("functor;$var");
 	    wfunctor=0
 	    wargs=1
 	elif [ "$return" = "upper" ] && [ $wfunctor = 0 ] &&
@@ -105,20 +99,47 @@ function parse_q() {
 	    ast[$iast]+=" $var";
 	elif [ "${var:0:1}" = ":" ] && [ $wfunctor = 0 ] &&
 	    [ $wargs = 1 ]; then
-	    ast+=("$var")
+	    ast+=("operation;$var")
 	    wfunctor=1
 	    wargs=0
 	    iast=`expr $iast + 2`
 	fi
     done
-    for var in "${ast[@]}"
+
+}
+
+#execute a single functor query with variable and value arguments
+function single_q {
+    functor=($1)
+    path="root/"
+    slots=()
+    index=0
+    for var in "${functor[@]}"
     do
-	echo $var
+	get_case "$var"
+	if [ "$return" = "upper" ]; then
+	    path+="*/"
+	else
+	    path+="$var/"
+	fi
+	index=`expr $index + 1`
     done
+    ls "$path"
 }
 
 function q {
     parse_q ${@}
+    result=""
+    for var in "${ast[@]}"
+    do
+	IFS=';' read -ra token <<< "$var"
+	if [ "${token[0]}" = "functor" ]; then
+	    single_q "${token[1]}" $context
+	else [ "${token[0]}" = "operation" ];
+	    echo "?"
+	fi
+	
+    done    
     # functor=$1
     # args=(${@:2})
     # transformed_args=()
@@ -142,7 +163,7 @@ function r {
 f father m n
 f father a b
 f father a b c
-# f father b c
+#f father b c
 q father X Y :and father Y X :or father Y Z a b
 #q father b c
 # r grandfather X Y :- father X Z :and father Z Y
