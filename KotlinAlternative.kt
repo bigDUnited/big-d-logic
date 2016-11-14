@@ -110,11 +110,10 @@ class Query( masterNode: Node ) {
 
 fun traceFather( masterNode: Node, candidateFatherNode: Node ): Node? {
     for (masterChildElem in masterNode.getChildren()) {
-        if ( masterChildElem.getName() == candidateFatherNode.getName() ) {
-            return masterChildElem;
-        }
+        if ( masterChildElem.getName() == candidateFatherNode.getName() ) {  return masterChildElem; }
+
         var tracingResult = traceFather(masterChildElem, candidateFatherNode);
-        if ( tracingResult != null ) return tracingResult
+        if ( tracingResult != null ) { return tracingResult; }
     }
     return null
 }
@@ -148,7 +147,7 @@ fun fact( masterNode: Node, fatherName: String, childName: String ) {
 fun exposeStructure( masterNode : Node, preventOverflow: ArrayList<Node>)  {
 
     for (child in masterNode.getChildren()){
-        println( "I am father '" + masterNode.getName() + "' and my child is '" + child.getName() + "'" );
+        println( "[EXPOSESTRUCTURE] Father: '" + masterNode.getName() + "', Child: '" + child.getName() + "'" );
 
         var isExisting = false;
         for (goner in preventOverflow){
@@ -161,10 +160,9 @@ fun exposeStructure( masterNode : Node, preventOverflow: ArrayList<Node>)  {
             preventOverflow.add( child );
             exposeStructure( child, preventOverflow );
         } else {
-            println("I am dying : " + child.getName() );
+            println("[EXPOSESTRUCTURE] Pointer to existing element '" + child.getName() + "' ... [die]" );
             //loop - die
         }
-
     }
 }
 
@@ -177,32 +175,31 @@ fun main(args: Array<String>) {
     fact(masterNode, "B", "E");
     fact(masterNode, "E", "F");
     fact(masterNode, "E", "G");
-
-
+    
     fact(masterNode, "A", "C");
     fact(masterNode, "C", "D");
     fact(masterNode, "D", "W");
 
     //Mixup connections
-    //fact(masterNode, "E", "A");
-    //fact(masterNode, "Q", "D");
+    fact(masterNode, "E", "A");
+    fact(masterNode, "Q", "D");
 
-    //fact(masterNode, "E", "123");
+    fact(masterNode, "E", "123");
 
     println("-------------------");
     var preventOverflow = ArrayList<Node>();
     preventOverflow.add( masterNode );
     exposeStructure(masterNode, preventOverflow );
 
-    println("-------------------");
     var queryObj = Query(masterNode);
-    println("[MAIN] Result is: " + queryObj.father("A", "B"));
     println("-------------------");
-    println("[MAIN] Result is: " + queryObj.father("A", "QPDASDASDAS") );
-    println("-------------------");
-    println("[MAIN] Result is: " + queryObj.grandfather("A", "E") );
-    println("-------------------");
-    println("[MAIN] Result is: " + queryObj.grandfather("A", "QPDASDASDAS") );
+    println("[MAIN] Result is: " + queryObj.father("E", "123"));
+//    println("-------------------");
+//    println("[MAIN] Result is: " + queryObj.father("A", "QPDASDASDAS") );
+//    println("-------------------");
+//    println("[MAIN] Result is: " + queryObj.grandfather("A", "E") );
+//    println("-------------------");
+//    println("[MAIN] Result is: " + queryObj.grandfather("A", "QPDASDASDAS") );
 
 
     //previous solution
