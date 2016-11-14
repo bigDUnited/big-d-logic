@@ -47,11 +47,11 @@ class Node constructor(parentsNode: ArrayList<Node>?, nodeName: String, children
 class Query( masterNode: Node ) {
     private var root : Node = masterNode;
 
-    fun father( fatherName: String, childName: String ) : Boolean {
+    fun father( fatherName: String?, childName: String? ) : Boolean {
         return find(root, fatherName, childName, "father");
     }
 
-    fun grandfather( fatherName: String, childName: String ) : Boolean {
+    fun grandfather( fatherName: String?, childName: String? ) : Boolean {
         return find(root, fatherName, childName, "grandfather");
     }
 
@@ -82,12 +82,93 @@ class Query( masterNode: Node ) {
         return child;
     }
 
-    private fun find( currentRoot: Node, fatherName: String, childName: String, state : String ): Boolean {
+    private fun find( currentRoot: Node, fatherName: String?, childName: String?, state : String ): Boolean {
         var parent : Node = Node(ArrayList<Node>(), "", ArrayList<Node>());
         var child : Node = Node(ArrayList<Node>(), "", ArrayList<Node>());
 
         var safeState = "father";
         if(state == "grandfather") { safeState = state; }
+
+        if( fatherName == null && childName != null ) {
+            for (godElem in currentRoot.getChildren()) {
+                if( "grandfather" == safeState ){
+                    for (childElem in godElem.getChildren()) {
+                        if (childElem.getName() == childName) {
+                            println("[FIND] For grandchild "+ childName +", found a grandfather: " + currentRoot);
+                            return true;
+                        }
+                    }
+                    var result = find(godElem, fatherName, childName, state);
+                    if (result == true) {
+                        return true;
+                    }
+                } else {
+                    if (godElem.getName() == childName) {
+                        println("[FIND] Found element: " + godElem);
+                        return true;
+                    }
+
+                    var result = find(godElem, fatherName, childName, state);
+                    if (result == true) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+
+        } else if ( fatherName != null && childName == null ) {
+            for (godElem in currentRoot.getChildren()) {
+                if( "grandfather" == safeState ){
+                    if (currentRoot.getName() == fatherName) {
+                        println("[FIND] Found element: " + currentRoot);
+                        for (rootChild in currentRoot.getChildren()) {
+                            for ( rootGrandChild in rootChild.getChildren() ) {
+                                println("[FIND] The grandchild is: " + rootGrandChild);
+                                return true;
+                            }
+                        }
+                    }
+
+                    for (childElem in godElem.getChildren()) {
+                        if (childElem.getName() == fatherName) {
+                            println("[FIND] Found element: " + currentRoot);
+                            for (rootChild in currentRoot.getChildren()) {
+                                for ( rootGrandChild in rootChild.getChildren() ) {
+                                    println("[FIND] The grandchild is: " + rootGrandChild);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    var result = find(godElem, fatherName, childName, state);
+                    if (result == true) {
+                        return true;
+                    }
+                } else {
+                    if (currentRoot.getName() == fatherName) {
+                        println(currentRoot);
+                        return true;
+                    }
+
+
+                    if (godElem.getName() == fatherName) {
+                        println("[FIND] Found element: " + godElem);
+                        return true;
+                    }
+
+                    var result = find(godElem, fatherName, childName, state);
+                    if (result == true) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } else if ( fatherName == null && childName == null ) {
+            var preventOverflow = ArrayList<Node>();
+            preventOverflow.add( currentRoot );
+            exposeStructure(currentRoot, preventOverflow );
+            return false;
+        }
 
         println("[FIND] Root: "+ currentRoot.getName() +", Father: " + fatherName + ", Child: " + childName);
 
@@ -109,9 +190,9 @@ class Query( masterNode: Node ) {
         if ( parent.getName() != "" ) {
             for (parentElem in parent.getChildren()) {
                 if( "grandfather" == safeState ){
-                    child = grandfatherSearch( parentElem, childName );
+                    child = grandfatherSearch( parentElem, childName!!);
                 } else {
-                    child = fatherSearch( parentElem, childName );
+                    child = fatherSearch( parentElem, childName!!);
                 }
                 if (child.getName() != "") { break; }
             }
@@ -228,11 +309,11 @@ fun rule( masterNode: Node, fatherName: String, childName: String ): Boolean {
 fun exposeStructure( masterNode : Node, preventOverflow: ArrayList<Node>)  {
 
     if( masterNode.getParents().size == 0 ) {
-        println( "[EXPOSESTRUCTURE] *ActualM* :" + masterNode.toString());
+        println( "[EXPOSESTRUCTURE] *MASTER* : " + masterNode.toString());
     }
 
     for (child in masterNode.getChildren()){
-        println( "[EXPOSESTRUCTURE] *Actual* :" + child.toString());
+        println( "[EXPOSESTRUCTURE] *CHILD*  : " + child.toString());
 
         var isExisting = false;
         for (goner in preventOverflow){
@@ -245,7 +326,7 @@ fun exposeStructure( masterNode : Node, preventOverflow: ArrayList<Node>)  {
             preventOverflow.add( child );
             exposeStructure( child, preventOverflow );
         } else {
-            println("[EXPOSESTRUCTURE] Pointer to existing element '" + child.getName() + "' ... [die]" );
+            println("[EXPOSESTRUCTURE] *UUPS!*  : Pointer to existing element '" + child.getName() + "' ... [die]" );
             //loop - die
         }
     }
@@ -266,6 +347,8 @@ fun main(args: Array<String>) {
     println("[MAIN] Fact is " + fact(masterNode, "F", "E") );
     println("[MAIN] Fact is " + fact(masterNode, "F", "H") );
     println("[MAIN] Fact is " + fact(masterNode, "Q", "A") );
+    println("[MAIN] Fact is " + fact(masterNode, "H", "I") );
+    println("[MAIN] Fact is " + fact(masterNode, "I", "J") );
 
     println("-------------------");
     println("[MAIN] Rule is " + rule(masterNode, "A", "C") );
@@ -285,5 +368,37 @@ fun main(args: Array<String>) {
     println("[MAIN] Result is: " + queryObj.grandfather("A", "E") );
     println("-------------------");
     println("[MAIN] Result is: " + queryObj.father("A", "H") );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.grandfather("B", "E") );
 
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.father(null, "B") );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.father(null, "H") );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.father(null, "QP") );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.father(null, null) );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.father("A", null) );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.father("B", null) );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.father("QP", null) );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.grandfather(null, "B") );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.grandfather(null, "C") );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.grandfather(null, "J") );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.grandfather("A", null) );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.grandfather("B", null) );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.grandfather("F", null) );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.grandfather("QP", null) );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.grandfather(null, null) );
 }
