@@ -18,118 +18,195 @@ class Node constructor(parentNode: Node?, nodeName: String, childenNode: ArrayLi
     fun getChildren(): ArrayList<Node> {
         return children!!;
     }
-}
 
-fun builder( a : Node ) {
-    var b = Node(a, "2", ArrayList<Node>() );
-    a.addChild( b );
-    var c = Node(a, "3", ArrayList<Node>() );
-    a.addChild( c );
-
-    var d = Node(b, "4", ArrayList<Node>() );
-    b.addChild( d );
-    var e = Node(b, "5", ArrayList<Node>() );
-    b.addChild( e );
-    var f = Node(b, "6", ArrayList<Node>() );
-    b.addChild( f );
-
-        var i = Node(e, "9", ArrayList<Node>() );
-        e.addChild(i);
-        var j = Node(e, "10", ArrayList<Node>() );
-        e.addChild(j);
-        var k = Node(e, "11", ArrayList<Node>() );
-        e.addChild(k);
-
-
-    var g = Node(c, "7", ArrayList<Node>() );
-    c.addChild( g );
-    var h = Node(c, "8", ArrayList<Node>() );
-    c.addChild( h );
-
-        var l = Node(g, "12", ArrayList<Node>() );
-        g.addChild(l);
-        var m = Node(g, "13", ArrayList<Node>() );
-        g.addChild(m);
-
-
-}
-
-fun grandfather( a : Node, aName: String, bName: String ): Boolean {
-    return father(a, aName, bName, "grandfather");
-}
-
-fun father( a : Node, aName: String, bName: String, state : String ): Boolean {
-    var god : Node = a;
-    var parent : Node = Node(null, "", null);
-    var child : Node = Node(null, "", null);
-
-    println("Hi! Req.Parent: " + aName + " & req.Child: " + bName);
-
-    if( god.getName() == aName ) {
-        parent = god;
-
-        println("You are first element (god!) - EASY!");
-
-    } else {
-        println("Go deep, current parent : " + a.getName());
-
-        for (godElem in god.getChildren()) {
-            println("Hi! Plausable Parent: " + godElem.getName() + " & req.Child: " + bName );
-
-            var result = father(godElem, aName, bName, state);
-            if (result == true ) return result;
-        }
+    fun getParent(): Node {
+        return parent!!;
     }
-    println("Checking : " + parent.getName() + " atm ...");
+}
 
-    if ( parent.getName() != "" ) {
-        for (parentElem in parent.getChildren()) {
-            if( "grandfather" == state ){
-                for (grandchildElem in parentElem.getChildren()) {
-                    if (grandchildElem.getName() == bName) {
-                        child = grandchildElem;
+class Query( masterNode: Node ) {
+    private var root : Node = masterNode;
 
-                        println("I AM the CORRECT >>> Grandchild!!! : " + grandchildElem.getName());
-                        break;
-                    } else {
+    fun father( fatherName: String, childName: String ) : Boolean {
+        return find(root, fatherName, childName, "father");
+    }
 
-                        println("I am NOT the correct >>> Grandchild : " + grandchildElem.getName());
-                    }
+    fun grandfather( fatherName: String, childName: String ) : Boolean {
+        return find(root, fatherName, childName, "grandfather");
+    }
 
-                }
+    private fun fatherSearch( parentChild: Node, childName: String ): Node {
+        var child : Node = Node(null, "", null);
+        if (parentChild.getName() == childName) {
+            child = parentChild;
+            println("[FATHER] Correct child: " + parentChild.getName());
+        } else {
+            //useless except for comment
+            println("[FATHER] Incorrect child: " + parentChild.getName());
+        }
+        return child;
+
+    }
+
+    private fun grandfatherSearch( parentChild: Node, childName: String ): Node {
+        var child : Node = Node(null, "", null);
+        for (grandchildElem in parentChild.getChildren()) {
+            if (grandchildElem.getName() == childName) {
+                child = grandchildElem;
+                println("[GRANDFATHER] Correct child: " + grandchildElem.getName());
+                break;
             } else {
-                if (parentElem.getName() == bName) {
-                    child = parentElem;
-
-                    println("I AM the CORRECT child!!! : " + parentElem.getName());
-                    break;
-                } else {
-
-                    println("I am NOT the correct child : " + parentElem.getName());
-                }
+                println("[GRANDFATHER] Incorrect child: " + grandchildElem.getName());
             }
         }
+        return child;
     }
 
-    if ( (child.getName() != "") && (parent.getName() != "") ) {
+    private fun find( currentRoot: Node, fatherName: String, childName: String, state : String ): Boolean {
+        var parent : Node = Node(null, "", null);
+        var child : Node = Node(null, "", null);
 
-        println("SUCCESS : parentName: " + parent.getName() + " & " + child.getName() );
-        return true;
+        var safeState = "father";
+        if(state == "grandfather") { safeState = state; }
+
+        println("[FIND] Root: "+ currentRoot.getName() +", Father: " + fatherName + ", Child: " + childName);
+
+        if( currentRoot.getName() == fatherName ) {
+            parent = currentRoot;
+            println("[FIND] Father element is Root! EASY!");
+        } else {
+            println("[FIND] Traverse from root: " + currentRoot.getName() + " to its children");
+
+            for (godElem in currentRoot.getChildren()) {
+                println("[FIND] Plausable root: " + godElem.getName() + ", Child: " + childName );
+
+                var result = find(godElem, fatherName, childName, state);
+                if (result == true ) return result;
+            }
+        }
+        println("[FIND] Searching in parent: " + parent.getName() + " [...]");
+
+        if ( parent.getName() != "" ) {
+            for (parentElem in parent.getChildren()) {
+                if( "grandfather" == safeState ){
+                    child = grandfatherSearch( parentElem, childName );
+                } else {
+                    child = fatherSearch( parentElem, childName );
+                }
+                if (child.getName() != "") { break; }
+            }
+        }
+
+        if ( (child.getName() != "") && (parent.getName() != "") ) {
+
+            println("[FIND] Success : " + safeState + ": " + parent.getName() + ", Child: " + child.getName() );
+            return true;
+        }
+
+        println("[FIND] Failure - Did not find proper " + safeState);
+        return false;
     }
+}
 
-    println("Did not find proper child, sorry!");
-    return false;
+fun traceFather( masterNode: Node, candidateFatherNode: Node ): Node? {
+    for (masterChildElem in masterNode.getChildren()) {
+        if ( masterChildElem.getName() == candidateFatherNode.getName() ) {  return masterChildElem; }
 
+        var tracingResult = traceFather(masterChildElem, candidateFatherNode);
+        if ( tracingResult != null ) { return tracingResult; }
+    }
+    return null
+}
+
+fun fact( masterNode: Node, fatherName: String, childName: String ) {
+    var candidateFatherNode = Node( null, fatherName, ArrayList<Node>() );
+    var candidateChildNode = Node( null, childName, ArrayList<Node>() );
+
+    var father = traceFather(masterNode, candidateFatherNode);
+    var child = traceFather(masterNode, candidateChildNode);
+
+    if ( child == null ) {
+        if ( father != null ) {
+            father.addChild(candidateChildNode);
+        } else if (fatherName == masterNode.getName()) {
+            masterNode.addChild(candidateChildNode);
+        } else {
+            candidateFatherNode.addChild( candidateChildNode );
+            masterNode.addChild( candidateFatherNode )
+        }
+    } else {
+        if ( father != null ) {
+            father.addChild(child);
+        } else {
+            masterNode.addChild(candidateFatherNode);
+            candidateFatherNode.addChild(candidateChildNode);
+        }
+    }
+}
+
+fun exposeStructure( masterNode : Node, preventOverflow: ArrayList<Node>)  {
+
+    for (child in masterNode.getChildren()){
+        println( "[EXPOSESTRUCTURE] Father: '" + masterNode.getName() + "', Child: '" + child.getName() + "'" );
+
+        var isExisting = false;
+        for (goner in preventOverflow){
+
+            if ( child.getName() == goner.getName() ) {
+                isExisting = true;
+            }
+        }
+        if ( !isExisting ) {
+            preventOverflow.add( child );
+            exposeStructure( child, preventOverflow );
+        } else {
+            println("[EXPOSESTRUCTURE] Pointer to existing element '" + child.getName() + "' ... [die]" );
+            //loop - die
+        }
+    }
 }
 
 fun main(args: Array<String>) {
-    val a = Node(null, "1", ArrayList<Node>() );
-    builder( a );
+    var masterNode = Node(null, "A", ArrayList<Node>() );
 
-    //println( "Result is " + father(a, "5", "11", "father") );
-    println( "Result is " +  grandfather(a, "2", "11") );
+    //Normal rotation
+    fact(masterNode, "A", "B");
+    fact(masterNode, "B", "BB");
+    fact(masterNode, "B", "E");
+    fact(masterNode, "E", "F");
+    fact(masterNode, "E", "G");
+    
+    fact(masterNode, "A", "C");
+    fact(masterNode, "C", "D");
+    fact(masterNode, "D", "W");
+
+    //Mixup connections
+    fact(masterNode, "E", "A");
+    fact(masterNode, "Q", "D");
+
+    fact(masterNode, "E", "123");
+
+    println("-------------------");
+    var preventOverflow = ArrayList<Node>();
+    preventOverflow.add( masterNode );
+    exposeStructure(masterNode, preventOverflow );
+
+    var queryObj = Query(masterNode);
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.father("E", "123"));
+//    println("-------------------");
+//    println("[MAIN] Result is: " + queryObj.father("A", "QPDASDASDAS") );
+//    println("-------------------");
+//    println("[MAIN] Result is: " + queryObj.grandfather("A", "E") );
+//    println("-------------------");
+//    println("[MAIN] Result is: " + queryObj.grandfather("A", "QPDASDASDAS") );
+
+
+    //previous solution
+    //val a = Node(null, "1", ArrayList<Node>() );
+    //builder( a );
+
+    //println( "Result is " + father(masterNode, "A", "B", "father") );
+    //println( "Result is " +  grandfather(masterNode, "A", "E") );
 
 }
-
-//MAP
-// 1 > [2 > [ 4, 5 > [ 9, 10, 11 ], 6], 3 > [ 7 > [ 12, 13 ], 8 ]
