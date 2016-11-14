@@ -122,12 +122,87 @@ fun father( a : Node, aName: String, bName: String, state : String ): Boolean {
 
 }
 
+fun traceFather( masterNode: Node, candidateFatherNode: Node ): Node? {
+    for (masterChildElem in masterNode.getChildren()) {
+        println("Candidate: " + candidateFatherNode.getName() + " vs Curr.Child : " + masterChildElem.getName()) ;
+        if ( masterChildElem.getName() == candidateFatherNode.getName() ) {
+            return masterChildElem;
+        }
+        println("Jump in");
+        var tracingResult = traceFather(masterChildElem, candidateFatherNode);
+        if ( tracingResult != null ) return tracingResult
+    }
+    return null
+}
+
+fun fact( masterNode: Node, fatherName: String, childName: String ) {
+    var candidateFatherNode = Node( null, fatherName, ArrayList<Node>() );
+    var candidateChildNode = Node( null, childName, ArrayList<Node>() );
+    println("fatherName: " + fatherName) ;
+    var father = traceFather(masterNode, candidateFatherNode);
+    var child = traceFather(masterNode, candidateChildNode);
+
+    if ( child == null ) {
+        if ( father != null ) {
+            println("I am existing");
+            father.addChild(candidateChildNode);
+        } else if (fatherName == masterNode.getName()) {
+            println("I am the father of all");
+            masterNode.addChild(candidateChildNode);
+        } else {
+            println("Yeahh, not existing");
+            candidateFatherNode.addChild( candidateChildNode );
+            masterNode.addChild( candidateFatherNode )
+        }
+    } else {
+        print("Child is existing : " + child.getName() + "\n");
+        if ( father != null ) {
+            father.addChild(child);
+        }
+    }
+}
+
+fun exposeStructure(trace: String, masterNode : Node) {
+    var preventOverflow = ArrayList<Node>();
+    preventOverflow.add( masterNode );
+
+    for (child in masterNode.getChildren()){
+        println( "I am father '" + masterNode.getName() + "' and my child is '" + trace + " " + child.getName() + "'" );
+        exposeStructure(trace + ">", child);
+
+//        for (previousChild in preventOverflow) {
+//            if ( previousChild.getName() != child.getName() ){
+//                println("Not equal");
+//                exposeStructure(trace + ">", child);
+//            } else {
+//                println("EQUAL UPS! Parent " + previousChild.getName() + " Child " + child.getName());
+//            }
+//        }
+    }
+}
+
 fun main(args: Array<String>) {
-    val a = Node(null, "1", ArrayList<Node>() );
-    builder( a );
+    var masterNode = Node(null, "A", ArrayList<Node>() );
+    fact(masterNode, "A", "B");
+    fact(masterNode, "A", "C");
+    fact(masterNode, "C", "D");
+    fact(masterNode, "B", "E");
+    //fact(masterNode, "E", "B");
+//    fact(masterNode, "B", "F");
+//    fact(masterNode, "B", "G");
+//    fact(masterNode, "F", "H");
+//    fact(masterNode, "F", "I");
+//    fact(masterNode, "F", "J");
+//    fact(masterNode, "G", "K");
+//    fact(masterNode, "C", "MAREK");
+    println("");
+    exposeStructure(">", masterNode );
+
+    //val a = Node(null, "1", ArrayList<Node>() );
+    //builder( a );
 
     //println( "Result is " + father(a, "5", "11", "father") );
-    println( "Result is " +  grandfather(a, "2", "11") );
+    //println( "Result is " +  grandfather(a, "2", "11") );
 
 }
 
