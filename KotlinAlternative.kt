@@ -128,14 +128,14 @@ class Query( masterNode: Node ) {
     }
 }
 
-fun traceFather( masterNode: Node, candidateFatherNode: Node ): Node? {
+fun traceNodeElem( masterNode: Node, candidateFatherNode: Node ): Node? {
     for (masterChildElem in masterNode.getChildren()) {
         if ( masterChildElem.getName() == candidateFatherNode.getName() ) {
             //println("Before 1" + masterChildElem.getName());
             return masterChildElem;
         }
 
-        var tracingResult = traceFather(masterChildElem, candidateFatherNode);
+        var tracingResult = traceNodeElem(masterChildElem, candidateFatherNode);
         if ( tracingResult != null ) {
             //println("Before 2" + masterChildElem.getName());
             return tracingResult;
@@ -144,58 +144,86 @@ fun traceFather( masterNode: Node, candidateFatherNode: Node ): Node? {
     return null
 }
 
-fun fact( masterNode: Node, fatherName: String, childName: String ) {
-    println("fatherName: " + fatherName + ", childName: " + childName);
+fun fact( masterNode: Node, fatherName: String, childName: String ) : Boolean {
+    println("[FACT] : fatherName: " + fatherName + ", childName: " + childName);
     var candidateFatherNode = Node( ArrayList<Node>(), fatherName, ArrayList<Node>() );
     var candidateChildNode = Node( ArrayList<Node>(), childName, ArrayList<Node>() );
 
-    var father = traceFather(masterNode, candidateFatherNode);
-    var child = traceFather(masterNode, candidateChildNode);
+    var father = traceNodeElem(masterNode, candidateFatherNode);
+    var child = traceNodeElem(masterNode, candidateChildNode);
+
+    if(masterNode.getName() == childName) {
+        return false;
+    }
 
     if ( child == null ) {
         if ( father != null ) {
-            println("1");
+            //println("1");
             candidateChildNode.addParent(father);
             father.addChild(candidateChildNode);
         } else if (fatherName == masterNode.getName()) {
-            println("2");
+            //println("2");
             candidateChildNode.addParent(masterNode);
             masterNode.addChild(candidateChildNode);
         } else {
-            println("3");
+            //println("3");
             candidateChildNode.addParent(candidateFatherNode);
             candidateFatherNode.addChild( candidateChildNode );
             candidateFatherNode.addParent(masterNode);
-            masterNode.addChild( candidateFatherNode )
+            masterNode.addChild( candidateFatherNode );
         }
     } else {
         if ( father == null ) {
             if ( candidateFatherNode.getName() == masterNode.getName() ) {
-                println("5.1 " + candidateChildNode.getName());
+                //println("5.1 " + candidateChildNode.getName());
                 masterNode.addChild(child);
                 child.addParent(masterNode);
             } else {
-                println("5.2 " + candidateChildNode.getName());
+                //println("5.2 " + candidateChildNode.getName());
                 candidateFatherNode.addParent(masterNode);
                 child.addParent(candidateFatherNode);
                 candidateFatherNode.addChild(child);
                 masterNode.addChild(candidateFatherNode);
             }
         } else {
-            println("4 " + child.getName());
+            //println("4 " + child.getName());
             father.addChild(child);
             child.addParent(father);
         }
     }
+    return true;
 }
 
-//fun rule( masterNode: Node, fatherName: String, childName: String ){
-//    var candidateFatherNode = Node( ArrayList<Node>(), fatherName, ArrayList<Node>() );
-//    var candidateChildNode = Node( ArrayList<Node>(), childName, ArrayList<Node>() );
-//
-//    var father = traceFather(masterNode, candidateFatherNode);
-//    var child = traceFather(masterNode, candidateChildNode);
-//}
+fun rule( masterNode: Node, fatherName: String, childName: String ): Boolean {
+    println("[RULE] : fatherName: " + fatherName + ", childName: " + childName);
+    var candidateFatherNode = Node( ArrayList<Node>(), fatherName, ArrayList<Node>() );
+    var candidateChildNode = Node( ArrayList<Node>(), childName, ArrayList<Node>() );
+
+    var father = traceNodeElem(masterNode, candidateFatherNode);
+    var child = traceNodeElem(masterNode, candidateChildNode);
+
+    if(masterNode.getName() == childName) {
+        return false;
+    }
+
+    if(masterNode.getName() == fatherName) {
+        father = masterNode;
+
+        if ( child != null ){
+            father.addChild( child );
+            child.addParent( father );
+            return true;
+        }
+    }
+
+    if ( father != null && child != null ) {
+        father.addChild( child );
+        child.addParent( father );
+        return true;
+    }
+
+    return false
+}
 
 fun exposeStructure( masterNode : Node, preventOverflow: ArrayList<Node>)  {
 
@@ -204,7 +232,6 @@ fun exposeStructure( masterNode : Node, preventOverflow: ArrayList<Node>)  {
     }
 
     for (child in masterNode.getChildren()){
-        //println( "[EXPOSESTRUCTURE] Father: '" + masterNode.getName() + "', Child: '" + child.getName() + "'" );
         println( "[EXPOSESTRUCTURE] *Actual* :" + child.toString());
 
         var isExisting = false;
@@ -227,61 +254,36 @@ fun exposeStructure( masterNode : Node, preventOverflow: ArrayList<Node>)  {
 fun main(args: Array<String>) {
     var masterNode = Node(ArrayList<Node>(), "A", ArrayList<Node>() );
 
-    //Normal rotation
-    fact(masterNode, "A", "B");
-    fact(masterNode, "B", "C");
-    fact(masterNode, "B", "D");
-    fact(masterNode, "D", "E");
+    println("-------------------");
+    println("[MAIN] Fact is " + fact(masterNode, "A", "B") );
+    println("[MAIN] Fact is " + fact(masterNode, "B", "C") );
+    println("[MAIN] Fact is " + fact(masterNode, "B", "D") );
+    println("[MAIN] Fact is " + fact(masterNode, "D", "E") );
+    println("[MAIN] Fact is " + fact(masterNode, "Q", "B") );
+    println("[MAIN] Fact is " + fact(masterNode, "A", "F") );
+    println("[MAIN] Fact is " + fact(masterNode, "G", "H") );
+    println("[MAIN] Fact is " + fact(masterNode, "A", "D") );
+    println("[MAIN] Fact is " + fact(masterNode, "F", "E") );
+    println("[MAIN] Fact is " + fact(masterNode, "F", "H") );
+    println("[MAIN] Fact is " + fact(masterNode, "Q", "A") );
 
-    fact(masterNode, "QQQ", "B");
-
-    fact(masterNode, "A", "F");
-    fact(masterNode, "G", "H");
-    fact(masterNode, "A", "D");
-
-    fact(masterNode, "F", "E");
-
-
-//    fact(masterNode, "E", "F");
-//    fact(masterNode, "E", "G");
-//
-//    fact(masterNode, "A", "H");
-//    fact(masterNode, "H", "I");
-//    fact(masterNode, "H", "J");
-//
-//    fact(masterNode, "Z", "ZZ");
-//    fact(masterNode, "C", "D");
-//    fact(masterNode, "D", "W");
-//
-//    //Mixup connections
-//    fact(masterNode, "E", "A");
-//    fact(masterNode, "Q", "D");
-//
-//    fact(masterNode, "E", "123");
+    println("-------------------");
+    println("[MAIN] Rule is " + rule(masterNode, "A", "C") );
+    println("[MAIN] Rule is " + rule(masterNode, "B", "E") );
+    println("[MAIN] Rule is " + rule(masterNode, "A", "E") );
+    println("[MAIN] Rule is " + rule(masterNode, "Q", "A") );
 
     println("-------------------");
     var preventOverflow = ArrayList<Node>();
     preventOverflow.add( masterNode );
     exposeStructure(masterNode, preventOverflow );
 
-//    var queryObj = Query(masterNode);
-//    println("-------------------");
-//    println("[MAIN] Result is: " + queryObj.father("E", "123"));
-//
-//    println( masterNode.toString() );
-//    println("-------------------");
-//    println("[MAIN] Result is: " + queryObj.father("A", "QPDASDASDAS") );
-//    println("-------------------");
-//    println("[MAIN] Result is: " + queryObj.grandfather("A", "E") );
-//    println("-------------------");
-//    println("[MAIN] Result is: " + queryObj.grandfather("A", "QPDASDASDAS") );
-
-
-    //previous solution
-    //val a = Node(null, "1", ArrayList<Node>() );
-    //builder( a );
-
-    //println( "Result is " + father(masterNode, "A", "B", "father") );
-    //println( "Result is " +  grandfather(masterNode, "A", "E") );
+    var queryObj = Query(masterNode);
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.father("A", "C"));
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.grandfather("A", "E") );
+    println("-------------------");
+    println("[MAIN] Result is: " + queryObj.father("A", "H") );
 
 }
