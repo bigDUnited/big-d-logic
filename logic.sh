@@ -78,6 +78,7 @@ function parse_q() {
     iast=0 #index of abstract sytax tree
     wfunctor=1 #awaiting functor
     wargs=0 #awaiting arguments
+    swap=1 #swap on next iteration
     for var in "$@"
     do
 	get_case $var
@@ -85,6 +86,7 @@ function parse_q() {
 	    ast+=("functor;$var");
 	    wfunctor=0
 	    wargs=1
+	    swap=`expr $swap + 1`;
 	elif [ "$return" = "upper" ] && [ $wfunctor = 0 ] &&
 	    [ $wargs = 1 ]; then
 	    case "${context[@]}" in
@@ -93,53 +95,102 @@ function parse_q() {
 		    context+=("$var")
 		    ;;
 	    esac
-	    ast[$iast]+=" $var";
+	    ast[$iast]+=";$var";
 	elif [ "$return" = "lower" ] && [ $wfunctor = 0 ] &&
 	    [ $wargs = 1 ]; then
-	    ast[$iast]+=" $var";
+	    ast[$iast]+=";$var";
 	elif [ "${var:0:1}" = ":" ] && [ $wfunctor = 0 ] &&
 	    [ $wargs = 1 ]; then
-	    ast+=("operation;$var")
+	    ast+=("operation;${var:1}")
+	    iast=`expr $iast + 2`
 	    wfunctor=1
 	    wargs=0
-	    iast=`expr $iast + 2`
 	fi
     done
-
 }
 
-#execute a single functor query with variable and value arguments
-function single_q {
-    functor=($1)
-    path="root/"
-    slots=()
+#order the parsed input
+function order_pile {
+    pile=(${@})
     index=0
-    for var in "${functor[@]}"
+    end="${#pile[@]}"
+    swap=1
+    while [ $index -le $end ]
     do
-	get_case "$var"
-	if [ "$return" = "upper" ]; then
-	    path+="*/"
-	else
-	    path+="$var/"
+	IFS=';' read -ra token <<< "${pile[$index]}"
+	if [ "${token[0]}" = "operation" ] && [ $swap = 1 ]; then
+	    tmp="${pile[$index]}"
+	    pile[$index]="${pile[$index+1]}"
+	    pile[$index+1]="${tmp[@]}"
+	    index=`expr $index + 1`
 	fi
 	index=`expr $index + 1`
     done
-    ls "$path"
+    ast=(${pile[@]})
+
+}
+
+function operation_and {
+    len="${#return_stack[@]}";
+    a="${return_stack[$len-1]}";
+    b="${return_stack[$len-2]}";
+    if [ "$a" = "true" ] && [ "$b" = "true" ]; then
+    	tmp="true"
+    else
+    	tmp="false"
+    fi
+
+    return_stack=("${return_stack[@]:2}")
+    return_stack+=($tmp)
+}
+
+function operation_or {
+    len="${#return_stack[@]}";
+    a="${return_stack[$len-1]}";
+    b="${return_stack[$len-2]}";
+    if [ "$a" = "true" ] || [ "$b" = "true" ]; then
+    	tmp="true"
+    else
+    	tmp="false"
+    fi
+
+    return_stack=("${return_stack[@]:2}")
+    return_stack+=($tmp)
+}
+
+#execute a pile of const queries and operations using a return stack
+function pile_q {
+    pile=(${@})
+    return_stack=()
+    for var in "${pile[@]}"
+    do
+	IFS=';' read -ra token <<< "$var"
+	if [ "${token[0]}" = "functor" ]; then
+	    
+	    return_stack+=($(const_q "${token[@]:1}"))
+	else [ "${token[0]}" = "operation" ];
+	    operation_${token[1]}
+	fi
+    done
+    echo "${return_stack[@]}"
 }
 
 function q {
     parse_q ${@}
-    result=""
-    for var in "${ast[@]}"
-    do
-	IFS=';' read -ra token <<< "$var"
-	if [ "${token[0]}" = "functor" ]; then
-	    single_q "${token[1]}" $context
-	else [ "${token[0]}" = "operation" ];
-	    echo "?"
-	fi
+    order_pile ${ast[@]}
+    pile_q ${ast[@]}
+    #result=""
+    
+    # for var in "${ast[@]}"
+    # do
+    # 	IFS=';' read -ra token <<< "$var"
+    # 	if [ "${token[0]}" = "functor" ]; then
+    # 	    single_q "${token[1]}" $context
+    # 	else [ "${token[0]}" = "operation" ];
+    # 	    echo "?"
+    # 	fi
 	
-    done    
+    # done    
     # functor=$1
     # args=(${@:2})
     # transformed_args=()
@@ -163,8 +214,12 @@ function r {
 f father m n
 f father a b
 f father a b c
+f father b a
+#f father a a
 #f father b c
-q father X Y :and father Y X :or father Y Z a b
+#q father X Y :and father Y X :or father Y Z a b
+q father m n :and father b a :or father a a :or father m n
+# q father a a
 #q father b c
 # r grandfather X Y :- father X Z :and father Z Y
 # f father n m
@@ -176,9 +231,6 @@ q father X Y :and father Y X :or father Y Z a b
 # f father b z
 # f cats a b
 #f cats b l
-# f father c b
-
-#f father y c 
 
 tree root
-rm -r root
+# rm -r root
