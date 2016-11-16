@@ -1,5 +1,5 @@
-%% father(a,b).
-father(b,a).
+father(a,b).
+father(b,c).
 %% father(b,c).
 %% father(c,c).
 %% father(b,c).
@@ -20,5 +20,5 @@ father(b,a).
 %% father(b,z).
 %% father(z,a).
 %% father(y,c).
-grandfather(X,Y):- father(Z,Z), father(Z,Y).
+grandfather(X,Y):- father(X,Z), father(Z,Y).
 

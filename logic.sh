@@ -127,7 +127,6 @@ function order_pile {
 	index=`expr $index + 1`
     done
     ast=(${pile[@]})
-
 }
 
 function operation_and {
@@ -166,8 +165,13 @@ function pile_q {
     do
 	IFS=';' read -ra token <<< "$var"
 	if [ "${token[0]}" = "functor" ]; then
-	    
-	    return_stack+=($(const_q "${token[@]:1}"))
+	    if [ "${token[@]:1:1}" = "true" ] ||
+		[ "${token[@]:1:1}" = "false" ]; then
+		return_stack+=("${token[@]:1:1}")
+	    else
+		return_stack+=($(const_q "${token[@]:1}"))		
+	    fi
+
 	else [ "${token[0]}" = "operation" ];
 	    operation_${token[1]}
 	fi
@@ -210,15 +214,32 @@ function r {
     echo ${@}
 }
 
-
-f father m n
 f father a b
-f father a b c
 f father b a
-#f father a a
-#f father b c
-#q father X Y :and father Y X :or father Y Z a b
-q father m n :and father b a :or father a a :or father m n
+f cats a b
+#q father X Y :and father Y X :and cats X Y
+
+q father b a :and $(q father a b :or father m b)
+#father X Y
+#0      x x
+#1      x x
+
+#father;
+#cats X Y
+#0    x
+#1      x
+
+#cats;
+# f father m n
+# f father a b
+# f father a b c
+# f father b a
+# f cats a b c x d
+# f cats a c c x d
+# #f father a a
+# #f father b c
+
+
 # q father a a
 #q father b c
 # r grandfather X Y :- father X Z :and father Z Y
@@ -233,4 +254,4 @@ q father m n :and father b a :or father a a :or father m n
 #f cats b l
 
 tree root
-# rm -r root
+rm -r root
