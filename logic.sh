@@ -68,8 +68,7 @@ function const_q {
     fi
 }
 
-#context where variables are stored
-context=()
+
 ast=()
 #return a chain of operations to be evaluated
 function parse_q() {
@@ -89,12 +88,6 @@ function parse_q() {
 	    swap=`expr $swap + 1`;
 	elif [ "$return" = "upper" ] && [ $wfunctor = 0 ] &&
 	    [ $wargs = 1 ]; then
-	    case "${context[@]}" in
-		*"$var"*) ;;
-		*)
-		    context+=("$var")
-		    ;;
-	    esac
 	    ast[$iast]+=";$var";
 	elif [ "$return" = "lower" ] && [ $wfunctor = 0 ] &&
 	    [ $wargs = 1 ]; then
@@ -199,6 +192,29 @@ function q {
     # const_q ${@}
 }
 
+#context where variables are stored
+declare -A context
+function fetch_variables {
+    context=()
+    transformed_args=()
+    pos=0
+    for var in "$@"
+    do
+    	get_case $var
+    	if [ "$return" =  "upper" ]; then
+	    context[$var]+="$pos;"
+    	    transformed_args+=("*")
+    	else
+    	    transformed_args+=("$var")
+    	fi
+	pos=`expr $pos + 1`
+    done
+    arg_path=$( IFS=$'/'; echo "${transformed_args[*]}" )
+    ls root/$arg_path
+    echo "${!context[@]}"
+    echo "${context[@]}"
+}
+
 function r {
     fact=()
     query=()
@@ -222,13 +238,14 @@ function r {
     fi
 }
 
+#q father X Y :and father Y X :and cats X Y
 f father a b
 f father b a
 f cats a b
-#q father X Y :and father Y X :and cats X Y
+# q father b a :and $(q father a b :or father m b)
+# r father l p :- father a b :and cats a b
+fetch_variables father A B A M A
 
-q father b a :and $(q father a b :or father m b)
-r father l p :- father a b :and cats a b
 #father X Y
 #0      x x
 #1      x x
