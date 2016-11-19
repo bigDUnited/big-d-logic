@@ -182,18 +182,7 @@ function pile_q {
 function q {
     parse_q ${@}
     order_pile ${ast[@]}
-    pile_q ${ast[@]}
-    #result=""
-    
-    # for var in "${ast[@]}"
-    # do
-    # 	IFS=';' read -ra token <<< "$var"
-    # 	if [ "${token[0]}" = "functor" ]; then
-    # 	    single_q "${token[1]}" $context
-    # 	else [ "${token[0]}" = "operation" ];
-    # 	    echo "?"
-    # 	fi
-	
+    pile_q ${ast[@]}	
     # done    
     # functor=$1
     # args=(${@:2})
@@ -211,7 +200,26 @@ function q {
 }
 
 function r {
-    echo ${@}
+    fact=()
+    query=()
+    stage=0
+    for i in "${@}"
+    do
+	if [ "$i" = ":-" ]; then
+	    stage=1
+	    continue
+        fi
+
+	if [ $stage = 0 ]; then
+	    fact+=("$i")
+	else
+	    query+=("$i")
+	fi
+    done
+    res=$(q "${query[@]}")
+    if [ "$res" = "true" ]; then
+	f "${fact[@]}"
+    fi
 }
 
 f father a b
@@ -220,6 +228,7 @@ f cats a b
 #q father X Y :and father Y X :and cats X Y
 
 q father b a :and $(q father a b :or father m b)
+r father l p :- father a b :and cats a b
 #father X Y
 #0      x x
 #1      x x
@@ -242,7 +251,7 @@ q father b a :and $(q father a b :or father m b)
 
 # q father a a
 #q father b c
-# r grandfather X Y :- father X Z :and father Z Y
+
 # f father n m
 # f father n i
 # f father n v
