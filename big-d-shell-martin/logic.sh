@@ -175,21 +175,7 @@ function pile_q {
 function q {
     parse_q ${@}
     order_pile ${ast[@]}
-    pile_q ${ast[@]}	
-    # done    
-    # functor=$1
-    # args=(${@:2})
-    # transformed_args=()
-    # for i in "${args[@]}"
-    # do
-    # 	get_case $i
-    # 	if [ "$return" =  "upper" ]; then
-    # 	    transformed_args+=("*")
-    # 	else
-    # 	    transformed_args+=($i)
-    # 	fi
-    # done
-    # const_q ${@}
+    pile_q ${ast[@]}
 }
 
 #context where variables are stored
@@ -242,9 +228,9 @@ function r {
 f father a b
 f father b a
 f cats a b
-# q father b a :and $(q father a b :or father m b)
-# r father l p :- father a b :and cats a b
-fetch_variables father A B A M A
+q father b a :and $(q father a b :or father m b)
+r father l p :- father a b :and cats a b
+# fetch_variables father A B A M A
 
 #father X Y
 #0      x x
