@@ -1,7 +1,7 @@
 # big-d-logic
 You guessed it! Its the logic of the Big D! It has no logic!
 
-### Prolog
+## Prolog
 To run the Prolog version do the following:
 (In case Prolog is not installed on your system):
 ```sh
@@ -36,3 +36,20 @@ run:
 ```sh
 ./logic.sh
 ```
+
+
+## Kotlin
+To install and work Kotlin in the easiest way possible we will need the IntelliJ IDEA IDE
+
+### Solution includes :
+Node object (representing the actual element in the tree structure)
+  containing : List of Parent Nodes, Name and List of Children Nodes
+Query object (representing the traversing and searching through Nodes)
+  containing 2 public function - father and grandfather
+Fact function for inserting facts
+Rule function for inserting rules
+Function for exposing the current structure
+Several helper functions and the main to start with
+
+
+The solution is tested and it works.
