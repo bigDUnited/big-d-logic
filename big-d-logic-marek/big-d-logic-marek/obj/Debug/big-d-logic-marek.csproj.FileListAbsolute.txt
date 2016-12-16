@@ -1,6 +1,0 @@
-F:\DocZ\Skola - Files\7 Semester\Discrete Meth\big-d-logic\big-d-logic-marek\big-d-logic-marek\bin\Debug\big-d-logic-marek.exe.config
-F:\DocZ\Skola - Files\7 Semester\Discrete Meth\big-d-logic\big-d-logic-marek\big-d-logic-marek\bin\Debug\big-d-logic-marek.exe
-F:\DocZ\Skola - Files\7 Semester\Discrete Meth\big-d-logic\big-d-logic-marek\big-d-logic-marek\bin\Debug\big-d-logic-marek.pdb
-F:\DocZ\Skola - Files\7 Semester\Discrete Meth\big-d-logic\big-d-logic-marek\big-d-logic-marek\obj\Debug\big-d-logic-marek.csprojResolveAssemblyReference.cache
-F:\DocZ\Skola - Files\7 Semester\Discrete Meth\big-d-logic\big-d-logic-marek\big-d-logic-marek\obj\Debug\big-d-logic-marek.exe
-F:\DocZ\Skola - Files\7 Semester\Discrete Meth\big-d-logic\big-d-logic-marek\big-d-logic-marek\obj\Debug\big-d-logic-marek.pdb

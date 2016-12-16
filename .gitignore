@@ -1,2 +1,5 @@
 logic
 logic.o
+*.suo
+big-d-logic-c_sharp/big-d-logic-c_sharp/bin
+big-d-logic-c_sharp/big-d-logic-c_sharp/obj
